@@ -1,0 +1,37 @@
+name: Pylint
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+      # Step 1: Checkout code
+      - uses: actions/checkout@v4
+
+      # Step 2: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Step 3: Install Poetry
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          export PATH="$HOME/.local/bin:$PATH"
+
+      # Step 4: Install Dependencies
+      - name: Install dependencies with Poetry
+        run: |
+          poetry install
+
+      # Step 5: Run Pylint
+      - name: Analyzing the code with Pylint
+        run: |
+          poetry run pylint $(git ls-files '*.py')
