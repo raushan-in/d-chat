@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "d-chat"
+version = "0.1.0"
+description = "chat with your private data"
+authors = ["raushan k <raushan.br.in@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115.6"
+langchain = "^0.3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
