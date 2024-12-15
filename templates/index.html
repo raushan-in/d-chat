@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D-Chat - Upload Your Data</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <h1>D-Chat</h1>
+    </header>
+    <div class="container">
+        <h2>Upload Your Data</h2>
+        <p>Welcome to D-Chat! To chat with your private data, upload your files below. We support PDF uploads for now.</p>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="files" multiple>
+            <input type="submit" value="Upload">
+        </form>
+    </div>
+    <footer>
+        &copy; 2024 D-Chat. All rights reserved.
+    </footer>
+</body>
+</html>
