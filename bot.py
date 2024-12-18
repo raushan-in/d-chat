@@ -1,82 +1,99 @@
-from transformers import T5ForConditionalGeneration, AutoTokenizer
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 from langchain_community.vectorstores import FAISS
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
+from langchain_huggingface import HuggingFacePipeline
+from langchain.chains.retrieval import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_core.prompts import ChatPromptTemplate
 
-from config import VECTOR_FOLDER
-from operations import hf_embedding
+from config import VECTOR_FOLDER, LLM_CHECKPOINT, PIPELINE_TASK, PIPELINE_TEMP
+from ingest import st_embeddings
 
-MODEL_NAME = "google/flan-t5-base"  # HuggingFace LLM model name
 
-def get_faiss_vectorstore_retriever(indx="KP Sheet - Raushan Kumar 2.pdf", search_type="similarity"):
+tokenizer = AutoTokenizer.from_pretrained(LLM_CHECKPOINT)
+model = AutoModelForSeq2SeqLM.from_pretrained(LLM_CHECKPOINT)
+text2text_pipe = pipeline(
+    task=PIPELINE_TASK,
+    model=model,
+    tokenizer=tokenizer,
+    device_map="auto",
+    do_sample=True,
+    temperature=PIPELINE_TEMP,
+)
+llm = HuggingFacePipeline(pipeline=text2text_pipe)
+
+SYSTEM_PROMPT = (
+    "Use the given context to answer the question. "
+    "If you don't know the answer, say you don't know. "
+    "Use three sentence maximum and keep the answer concise. "
+    "Context: {context}"
+)
+prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", SYSTEM_PROMPT),
+        ("human", "{input}"),
+    ]
+)
+
+
+def get_faiss_vectorstore_retriever(index_name: str):
     """Load the FAISS index with HuggingFace embeddings."""
     print("Loading FAISS index...")
     vectorstore = FAISS.load_local(
-        VECTOR_FOLDER, embeddings=hf_embedding, index_name=indx, allow_dangerous_deserialization=True
+        VECTOR_FOLDER,
+        embeddings=st_embeddings,
+        index_name=index_name,
+        allow_dangerous_deserialization=True,
     )
-    retriever = vectorstore.as_retriever(search_type=search_type, search_kwargs={"k": 6})
-    return retriever
+    return vectorstore.as_retriever()
 
-def load_llm(model_name):
-    """Load the FLAN-T5 model and tokenizer."""
-    model = T5ForConditionalGeneration.from_pretrained(model_name)
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    return model, tokenizer
 
-def format_docs(docs):
-    """Combine retrieved documents into a single string."""
-    return "\n\n".join(doc.page_content for doc in docs)
+# def format_retrieved_docs(doc_list: list):
+#     """Combine retrieved documents into a single string."""
+#     return "\n\n".join(doc.page_content for doc in doc_list)
+
 
 def main():
     """Main function to run the chatbot."""
     print("Starting chatbot...")
 
-    retriever = get_faiss_vectorstore_retriever()
+    # -------- Define Source
+    # index_to_use = input("**Enter index to use**:")
+    index_to_use = "KP Sheet - Raushan Kumar 2.pdf"
+    # --------
 
-    model, tokenizer = load_llm(MODEL_NAME)
+    retriever = get_faiss_vectorstore_retriever(index_to_use)
 
-    system_prompt = """
-        Use the following context to answer the user's question accurately. 
-        Do not include irrelevant information or numbers. 
-        If you cannot find the answer in the context, respond with 'I do not know'.
+    def rag_chain(query):
+        """
+        Define the RAG chain
+        Doc: https://python.langchain.com/v0.2/docs/tutorials/rag/#built-in-chains
+        """
+        # convenience functions for LCEL
+        question_answer_chain = create_stuff_documents_chain(llm, prompt)
+        chain = create_retrieval_chain(retriever, question_answer_chain)
+        response = chain.invoke({"input": query})
+        # print(response["context"]) # sources that were used to generate the answer
+        return response["answer"]
 
-        Context:
-        {context}
+    # Interactive chat loop
+    print("\nChatbot is ready! Type 'exit' or 'quit' to stop.\n")
 
-        Question: {question}
+    while True:
+        query = input("You: ")
+        if query.lower() in ["exit", "quit"]:
+            print("Exiting chatbot. Goodbye!")
+            break
+        if not query.strip():
+            print("Please enter a valid question.")
+            continue
 
-        Answer:"""
+        # Get response from the RAG chain
+        try:
+            response = rag_chain(query)
+            print(f"Bot: {response}")
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
-
-    prompt = PromptTemplate(
-        name="system_prompt",
-        input_variables=["context", "question"],
-        template=system_prompt
-    )
-
-    # Define the RAG chain
-    def rag_chain(question):
-        # Retrieve relevant documents
-        docs = retriever.invoke(question)
-        context = format_docs(docs)
-
-        # Format the prompt
-        formatted_prompt = prompt.format(context=context, question=question)
-
-        # Tokenize the input
-        inputs = tokenizer(formatted_prompt, return_tensors="pt", max_length=512, truncation=True)
-
-        # Generate output
-        outputs = model.generate(**inputs, max_length=128, num_return_sequences=1)
-        response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        return response
-
-    # Example test query
-    query = "What is annual salary?"
-    print(f"Question: {query}")
-    response = rag_chain(query)
-    print(f"Answer: {response}")
 
 if __name__ == "__main__":
     main()
