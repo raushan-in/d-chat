@@ -7,7 +7,7 @@ INPUT_FILE_FORMAT = ".pdf"
 # "meta-llama/Llama-3.3-70B-Instruct"  # "google/flan-t5-base"
 LLM_CHECKPOINT = "google/flan-t5-base"
 PIPELINE_TASK = "text2text-generation"  # "summarization" # "text2text-generation"
-PIPELINE_TEMP = 0.3
+PIPELINE_TEMP = 0.1
 
 # prompt
 PROMP_CONFIGS = [
