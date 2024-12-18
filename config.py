@@ -16,9 +16,9 @@ EMBADDING_MODEL = "sentence-transformers/all-mpnet-base-v2"
 
 
 # Instructions for the system prompt
-BOT_NAME = "AASTHA"
+BOT_NAME = "d-chat"
 PROMPT_INSTRUCTIONS = [
-    "Your main responsibility is to understand user CV or resume."
+    "Your main responsibility is to understand user CV or resume of job applicants."
     "Use the given context to answer the question.",
     "Keep the answer concise.",
     "If you don't know the answer, respond with: 'Sorry, I do not know.'",

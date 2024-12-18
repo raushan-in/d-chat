@@ -46,7 +46,7 @@ Context: {context}
 
 prompt = ChatPromptTemplate.from_messages(
     [
-        ("system", f"You are a AI assistant bot. Your name is {BOT_NAME}."),
+        ("system", f"You are an assistant bot, named {BOT_NAME}."),
         ("system", PROMPT_LITERALS),
         ("human", "{input}"),
     ]
@@ -56,22 +56,25 @@ prompt = ChatPromptTemplate.from_messages(
 def get_faiss_vectorstore_retriever(index_name: str):
     """Load the FAISS index with HuggingFace embeddings."""
     print("Loading FAISS index...")
-    vectorstore = FAISS.load_local(
-        VECTOR_FOLDER,
-        embeddings=st_embeddings,
-        index_name=index_name,
-        allow_dangerous_deserialization=True,
-    )
+    try:
+        vectorstore = FAISS.load_local(
+            VECTOR_FOLDER,
+            embeddings=st_embeddings,
+            index_name=index_name,
+            allow_dangerous_deserialization=True,
+        )
+    except RuntimeError as re:
+        print(repr(re))
+        raise InterruptedError("No such file.") from re
     return vectorstore.as_retriever()
 
 
 def main():
     """Main function to run the chatbot."""
-    print("Starting chatbot...")
+    print("Starting app...")
 
     # -------- Define Source
-    # index_to_use = input("**Enter index to use**:")
-    index_to_use = "Raushan_b.pdf"
+    index_to_use = input("Enter PDF name :")
     # --------
 
     retriever = get_faiss_vectorstore_retriever(index_to_use)
@@ -90,9 +93,9 @@ def main():
         # print(response["context"]) # sources that were used to generate the answer
         return response["answer"]
 
-    # Interactive chat loop
-    print("\nChatbot is ready! Type 'exit' or 'quit' to stop.\n")
+    print("\n****Chatbot is ready! Type `exit` or `quit` to stop.****\n")
 
+    # Interactive chat loop
     while True:
         query = input("You: ")
         if query.lower() in ["exit", "quit"]:
