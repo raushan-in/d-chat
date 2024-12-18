@@ -1,24 +1,28 @@
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
-from langchain_community.vectorstores import FAISS
-from langchain_huggingface import HuggingFacePipeline
-from langchain.chains.retrieval import create_retrieval_chain
+"""
+Chat BOT
+"""
+
 from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains.retrieval import create_retrieval_chain
+from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_huggingface import HuggingFaceEmbeddings, HuggingFacePipeline
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 
 from config import (
-    VECTOR_FOLDER,
+    BOT_NAME,
+    EMBADDING_MODEL,
     LLM_CHECKPOINT,
-    PIPELINE_TASK,
+    LLM_TASK,
     LLM_TEMPERATURE,
     PROMPT_INSTRUCTIONS,
+    VECTOR_FOLDER,
 )
-from ingest import st_embeddings
-
 
 tokenizer = AutoTokenizer.from_pretrained(LLM_CHECKPOINT)
 model = AutoModelForSeq2SeqLM.from_pretrained(LLM_CHECKPOINT)
 text2text_pipe = pipeline(
-    task=PIPELINE_TASK,
+    task=LLM_TASK,
     model=model,
     tokenizer=tokenizer,
     device_map="auto",
@@ -27,23 +31,23 @@ text2text_pipe = pipeline(
 )
 llm = HuggingFacePipeline(pipeline=text2text_pipe)
 
+st_embeddings = HuggingFaceEmbeddings(model_name=EMBADDING_MODEL)
 
-prompt_instructions = "\n".join(
+
+PROMPT_INSTRUCTIONS_STR = "\n".join(
     [f"{idx+1}. {instruction}" for idx, instruction in enumerate(PROMPT_INSTRUCTIONS)]
 )
 
-prompt_literals = """You are a helpful and concise AI assistant named d-bot.
-
-Instructions:
-{instructions}
-
+PROMPT_LITERALS = """Instructions:
+{instructions} \n
 Context: {context}
 """
 
 
 prompt = ChatPromptTemplate.from_messages(
     [
-        ("system", prompt_literals),
+        ("system", f"You are a AI assistant bot. Your name is {BOT_NAME}."),
+        ("system", PROMPT_LITERALS),
         ("human", "{input}"),
     ]
 )
@@ -59,11 +63,6 @@ def get_faiss_vectorstore_retriever(index_name: str):
         allow_dangerous_deserialization=True,
     )
     return vectorstore.as_retriever()
-
-
-# def format_retrieved_docs(doc_list: list):
-#     """Combine retrieved documents into a single string."""
-#     return "\n\n".join(doc.page_content for doc in doc_list)
 
 
 def main():
@@ -85,7 +84,9 @@ def main():
         # convenience functions for LCEL
         question_answer_chain = create_stuff_documents_chain(llm, prompt)
         chain = create_retrieval_chain(retriever, question_answer_chain)
-        response = chain.invoke({"input": query, "instructions": prompt_instructions})
+        response = chain.invoke(
+            {"input": query, "instructions": PROMPT_INSTRUCTIONS_STR}
+        )
         # print(response["context"]) # sources that were used to generate the answer
         return response["answer"]
 
