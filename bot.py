@@ -9,8 +9,8 @@ from config import (
     VECTOR_FOLDER,
     LLM_CHECKPOINT,
     PIPELINE_TASK,
-    PIPELINE_TEMP,
-    PROMP_CONFIGS,
+    LLM_TEMPERATURE,
+    PROMPT_INSTRUCTIONS,
 )
 from ingest import st_embeddings
 
@@ -23,20 +23,27 @@ text2text_pipe = pipeline(
     tokenizer=tokenizer,
     device_map="auto",
     do_sample=True,
-    temperature=PIPELINE_TEMP,
+    temperature=LLM_TEMPERATURE,
 )
 llm = HuggingFacePipeline(pipeline=text2text_pipe)
 
 
-system_prompt = (
-    "You are a helpful AI bot. Your name is d-bot.\n"
-    + ".\n".join(PROMP_CONFIGS)
-    + ".\nContext: {context}"
+prompt_instructions = "\n".join(
+    [f"{idx+1}. {instruction}" for idx, instruction in enumerate(PROMPT_INSTRUCTIONS)]
 )
+
+prompt_literals = """You are a helpful and concise AI assistant named d-bot.
+
+Instructions:
+{instructions}
+
+Context: {context}
+"""
+
 
 prompt = ChatPromptTemplate.from_messages(
     [
-        ("system", system_prompt),
+        ("system", prompt_literals),
         ("human", "{input}"),
     ]
 )
@@ -65,7 +72,7 @@ def main():
 
     # -------- Define Source
     # index_to_use = input("**Enter index to use**:")
-    index_to_use = "KP Sheet - Raushan Kumar 2.pdf"
+    index_to_use = "Raushan_b.pdf"
     # --------
 
     retriever = get_faiss_vectorstore_retriever(index_to_use)
@@ -78,7 +85,7 @@ def main():
         # convenience functions for LCEL
         question_answer_chain = create_stuff_documents_chain(llm, prompt)
         chain = create_retrieval_chain(retriever, question_answer_chain)
-        response = chain.invoke({"input": query})
+        response = chain.invoke({"input": query, "instructions": prompt_instructions})
         # print(response["context"]) # sources that were used to generate the answer
         return response["answer"]
 
