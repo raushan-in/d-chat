@@ -5,7 +5,13 @@ from langchain.chains.retrieval import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 
-from config import VECTOR_FOLDER, LLM_CHECKPOINT, PIPELINE_TASK, PIPELINE_TEMP
+from config import (
+    VECTOR_FOLDER,
+    LLM_CHECKPOINT,
+    PIPELINE_TASK,
+    PIPELINE_TEMP,
+    PROMP_CONFIGS,
+)
 from ingest import st_embeddings
 
 
@@ -21,15 +27,16 @@ text2text_pipe = pipeline(
 )
 llm = HuggingFacePipeline(pipeline=text2text_pipe)
 
-SYSTEM_PROMPT = (
-    "Use the given context to answer the question. "
-    "If you don't know the answer, say you don't know. "
-    "Use three sentence maximum and keep the answer concise. "
-    "Context: {context}"
+
+system_prompt = (
+    "You are a helpful AI bot. Your name is d-bot.\n"
+    + ".\n".join(PROMP_CONFIGS)
+    + ".\nContext: {context}"
 )
+
 prompt = ChatPromptTemplate.from_messages(
     [
-        ("system", SYSTEM_PROMPT),
+        ("system", system_prompt),
         ("human", "{input}"),
     ]
 )
