@@ -1,3 +1,6 @@
+"""
+Extract and save source data
+"""
 import os
 
 from langchain_community.document_loaders import PDFPlumberLoader
