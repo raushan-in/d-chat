@@ -8,13 +8,9 @@ from langchain.text_splitter import CharacterTextSplitter
 from config import VECTOR_FOLDER
 
 
-# Initialize Embedding model
-model_name = "sentence-transformers/all-mpnet-base-v2"
-model_kwargs = {"device": "cpu"}
-encode_kwargs = {"normalize_embeddings": False}
-hf_embedding = HuggingFaceEmbeddings(
-    model_name=model_name, model_kwargs=model_kwargs, encode_kwargs=encode_kwargs
-)
+# Initialize Sentence Transformers Embedding
+EMBADDING_MODEL = "sentence-transformers/all-mpnet-base-v2"
+st_embeddings = HuggingFaceEmbeddings(model_name=EMBADDING_MODEL)
 
 
 def extract_pdf(file_path):
@@ -63,7 +59,8 @@ def chunck_docs(documents: list, chunk_size=1000, chunk_overlap=200):
 
 def save_to_faiss(chunks, index_name="faiss_index"):
     """
-    Stores document chunks into a FAISS vector database.
+    Stores embedded document chunks into a FAISS vector database.
+    Uses Sentence Transformers Embedding. \n
     Args:
         chunks (list): A list of document chunks.
         index_name (str): Name of the FAISS index file to save.
@@ -71,7 +68,7 @@ def save_to_faiss(chunks, index_name="faiss_index"):
     os.makedirs(VECTOR_FOLDER, exist_ok=True)
 
     # Create FAISS vector database
-    vectorstore = FAISS.from_documents(chunks, hf_embedding)
+    vectorstore = FAISS.from_documents(chunks, st_embeddings)
 
     # Save FAISS index locally
     vectorstore.save_local(folder_path=VECTOR_FOLDER, index_name=index_name)
@@ -96,5 +93,5 @@ def process_uploaded_docs(file_path, file_format):
     # Step 2: Split content into chunks
     chunks = chunck_docs(documents)
 
-    # Step 3: Save chunks to FAISS
+    # Step 3: Embed and Save data to FAISS
     save_to_faiss(chunks, index_name=file_path.split("/")[-1])

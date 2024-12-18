@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from config import INPUT_FILE_FORMAT, UPLOAD_FOLDER
-from operations import process_uploaded_docs
+from ingest import process_uploaded_docs
 
 app = FastAPI(title="d-chat")
 
