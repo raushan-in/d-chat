@@ -8,7 +8,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from config import INPUT_FILE_FORMAT, UPLOAD_FOLDER
+from config import INPUT_FILE_FORMAT, PORT, UPLOAD_FOLDER, VECTOR_FOLDER
 from inference import rag_chain
 from ingest import process_uploaded_docs
 
@@ -26,6 +26,11 @@ async def landing_page(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
+@app.get("/chat", response_class=HTMLResponse)
+async def chat_page(request: Request):
+    return templates.TemplateResponse("chat.html", {"request": request})
+
+
 @app.post("/upload")
 async def upload_files(files: List[UploadFile] = File(...)):
     if not files:
@@ -37,7 +42,10 @@ async def upload_files(files: List[UploadFile] = File(...)):
             with open(file_path, "wb") as f:
                 f.write(await file.read())
         else:
-            return {"error": f"File {file.filename} is not a {INPUT_FILE_FORMAT}"}
+            raise HTTPException(
+                status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+                detail="Not a valid file.",
+            )
 
     process_uploaded_docs(file_path, INPUT_FILE_FORMAT)
     return {"message": "Files uploaded successfully!"}
@@ -60,7 +68,24 @@ async def ask_question(question: str, file_name: str):
         ) from e
 
 
+@app.get("/uploaded-files")
+async def list_faiss_files():
+    try:
+        if not os.path.exists(VECTOR_FOLDER):
+            raise HTTPException(status_code=404, detail="Vectors folder not found")
+
+        files = [
+            os.path.splitext(f)[0]
+            for f in os.listdir(VECTOR_FOLDER)
+            if f.endswith(".faiss")
+        ]
+        return {"files": files}
+    except Exception as e:
+        print(repr(e))
+        raise HTTPException(HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e)) from e
+
+
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=PORT)

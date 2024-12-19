@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D-Chat - Chat with Your Data</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .container {
+            max-width: 90%;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+            text-align: left;
+        }
+
+        select, input[type="text"] {
+            width: calc(80% - 60px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            display: inline-block;
+        }
+
+        #askButton {
+            width: 50px;
+            height: 44px;
+            background-color: #8F00FF;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            vertical-align: middle;
+            transition: background-color 0.3s ease;
+        }
+
+        #askButton:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        #conversation {
+            margin-top: 20px;
+            height: 60vh;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            box-sizing: border-box;
+            text-align: left;
+        }
+
+        .question {
+            text-align: left;
+            margin: 10px 0;
+            padding-right: 50px;
+            word-wrap: break-word;
+            font-weight: bold;
+            color: #8F00FF; /* Changed question color to #8F00FF */
+        }
+
+        .answer {
+            text-align: right;
+            margin: 10px 0;
+            padding-left: 50px;
+            word-wrap: break-word;
+            color: #000; /* Changed answer color to dark black */
+            font-weight: bold;
+        }
+
+        footer {
+            position: static;
+        }
+    </style>
+</head>
+<body>
+    <!-- Include Header -->
+    {% include 'header.html' %}
+    <div class="container">
+        <h2>Chat with Your Data</h2>
+        <label for="fileSelect">Select File:</label>
+        <select id="fileSelect">
+            <option value="" disabled selected>Loading files...</option>
+        </select>
+
+        <div id="conversation"></div>
+
+        <div>
+            <input type="text" id="questionInput" placeholder="Type your question here">
+            <button id="askButton">➤</button>
+        </div>
+    </div>
+    <!-- Include Footer -->
+    {% include 'footer.html' %}
+    <script>
+        const fileSelect = document.getElementById('fileSelect');
+        const askButton = document.getElementById('askButton');
+        const questionInput = document.getElementById('questionInput');
+        const conversationDiv = document.getElementById('conversation');
+
+        // Fetch available files and populate the dropdown
+        async function fetchFiles() {
+            try {
+                const response = await fetch('/uploaded-files');
+                if (response.ok) {
+                    const data = await response.json();
+                    fileSelect.innerHTML = '<option value="" disabled selected>Select a file</option>';
+                    data.files.forEach(file => {
+                        const option = document.createElement('option');
+                        option.value = file;
+                        option.textContent = file;
+                        fileSelect.appendChild(option);
+                    });
+                } else {
+                    alert('Failed to load files.');
+                }
+            } catch (error) {
+                alert(`Unexpected error: ${error.message}`);
+            }
+        }
+
+        // Clear conversation when file selection changes
+        fileSelect.addEventListener('change', () => {
+            conversationDiv.innerHTML = ''; // Clear the conversation
+        });
+
+        // Handle asking a question
+        askButton.addEventListener('click', async () => {
+            const selectedFile = fileSelect.value;
+            const question = questionInput.value.trim();
+
+            if (!selectedFile) {
+                alert('Please select a file.');
+                return;
+            }
+
+            if (!question) {
+                alert('Please enter a question.');
+                return;
+            }
+
+            // Add question to the conversation immediately
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question';
+            questionDiv.textContent = `Q: ${question}`;
+            conversationDiv.appendChild(questionDiv);
+            conversationDiv.scrollTop = conversationDiv.scrollHeight;
+
+            // Clear the input field immediately
+            questionInput.value = '';
+            askButton.disabled = true;
+
+            try {
+                const queryParams = new URLSearchParams({ question, file_name: selectedFile }).toString();
+                const response = await fetch(`/ask?${queryParams}`, { method: 'POST' });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const answerDiv = document.createElement('div');
+                    answerDiv.className = 'answer';
+                    answerDiv.textContent = `A: ${data.answer}`;
+                    conversationDiv.appendChild(answerDiv);
+                    conversationDiv.scrollTop = conversationDiv.scrollHeight;
+                } else {
+                    const error = await response.json();
+                    alert(`Error: ${error.detail || 'Something went wrong.'}`);
+                }
+            } catch (error) {
+                alert(`Unexpected error: ${error.message}`);
+            } finally {
+                askButton.disabled = false;
+            }
+        });
+
+        // Initialize the page
+        fetchFiles();
+    </script>
+</body>
+</html>
