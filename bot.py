@@ -2,6 +2,7 @@
 Chat BOT
 """
 
+import torch
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains.retrieval import create_retrieval_chain
 from langchain_community.vectorstores import FAISS
@@ -19,8 +20,10 @@ from config import (
     VECTOR_FOLDER,
 )
 
-tokenizer = AutoTokenizer.from_pretrained(LLM_CHECKPOINT)
-model = AutoModelForSeq2SeqLM.from_pretrained(LLM_CHECKPOINT)
+tokenizer = AutoTokenizer.from_pretrained(
+    LLM_CHECKPOINT, return_tensors="pt", truncation=True
+)
+model = AutoModelForSeq2SeqLM.from_pretrained(LLM_CHECKPOINT, torch_dtype=torch.float32)
 text2text_pipe = pipeline(
     task=LLM_TASK,
     model=model,
