@@ -12,14 +12,48 @@
     </header>
     <div class="container">
         <h2>Upload Your Data</h2>
-        <p>Welcome to D-Chat! To chat with your private data, upload your files below. We support PDF uploads for now.</p>
-        <form action="/upload" method="post" enctype="multipart/form-data">
-            <input type="file" name="files" multiple>
-            <input type="submit" value="Upload">
+        <p>To chat with your private data, upload your files below. We support PDF uploads for now.</p>
+        <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="files" id="fileInput" multiple required>
+            <input type="submit" id="submitButton" value="Upload">
         </form>
+        <div id="message" style="margin-top: 20px; font-weight: bold;"></div>
     </div>
     <footer>
         &copy; 2024 D-Chat. All rights reserved.
     </footer>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const submitButton = document.getElementById('submitButton');
+        const messageDiv = document.getElementById('message');
+
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault(); // Prevent default form submission
+            submitButton.disabled = true; // Disable the submit button
+            messageDiv.textContent = 'Uploading... Please wait.';
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    messageDiv.textContent = result.message || 'Files uploaded successfully!';
+                } else {
+                    const error = await response.json();
+                    messageDiv.textContent = `Error: ${error.error || 'Upload failed.'}`;
+                }
+            } catch (err) {
+                messageDiv.textContent = `Unexpected error: ${err.message}`;
+            } finally {
+                submitButton.disabled = false; // Re-enable the submit button
+            }
+        });
+    </script>
 </body>
 </html>
