@@ -42,7 +42,10 @@ async def upload_files(files: List[UploadFile] = File(...)):
             with open(file_path, "wb") as f:
                 f.write(await file.read())
         else:
-            return {"error": f"File {file.filename} is not a {INPUT_FILE_FORMAT}"}
+            raise HTTPException(
+                status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+                detail="Not a valid file.",
+            )
 
     process_uploaded_docs(file_path, INPUT_FILE_FORMAT)
     return {"message": "Files uploaded successfully!"}

@@ -6,6 +6,23 @@
     <title>D-Chat - Upload Your Data</title>
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+    <style>
+        .message {
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .message.success {
+            color: green;
+        }
+        .message.error {
+            color: red;
+        }
+        input[type="submit"]:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
     <!-- Include Header -->
@@ -13,12 +30,49 @@
     <div class="container">
         <h2>Upload Your Data</h2>
         <p>To chat with your private data, upload your files below. We support PDF uploads for now.</p>
-        <form action="/upload" method="post" enctype="multipart/form-data">
-            <input type="file" name="files" multiple>
-            <input type="submit" value="Upload">
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="files" id="fileInput" multiple>
+            <input type="submit" id="submitButton" value="Upload">
         </form>
+        <div id="message" class="message"></div>
     </div>
     <!-- Include Footer -->
     {% include 'footer.html' %}
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const submitButton = document.getElementById('submitButton');
+        const messageDiv = document.getElementById('message');
+
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault(); // Prevent default form submission
+            const formData = new FormData(form);
+            submitButton.disabled = true; // Disable the submit button
+            messageDiv.textContent = 'Uploading... Please wait.';
+            messageDiv.className = 'message';
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    messageDiv.textContent = result.message || 'Files uploaded successfully!';
+                    messageDiv.className = 'message success';
+                } else {
+                    const error = await response.json();
+                    messageDiv.textContent = error.error || 'Failed to upload files.';
+                    messageDiv.className = 'message error';
+                }
+            } catch (err) {
+                messageDiv.textContent = `Unexpected error: ${err.message}`;
+                messageDiv.className = 'message error';
+            } finally {
+                submitButton.disabled = false; // Re-enable the submit button
+            }
+        });
+    </script>
 </body>
 </html>
