@@ -8,7 +8,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from config import INPUT_FILE_FORMAT, UPLOAD_FOLDER
+from config import INPUT_FILE_FORMAT, UPLOAD_FOLDER, VECTOR_FOLDER
 from inference import rag_chain
 from ingest import process_uploaded_docs
 
@@ -58,6 +58,23 @@ async def ask_question(question: str, file_name: str):
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e)
         ) from e
+
+
+@app.get("/uploaded-files")
+async def list_faiss_files():
+    try:
+        if not os.path.exists(VECTOR_FOLDER):
+            raise HTTPException(status_code=404, detail="Vectors folder not found")
+
+        files = [
+            os.path.splitext(f)[0]
+            for f in os.listdir(VECTOR_FOLDER)
+            if f.endswith(".faiss")
+        ]
+        return {"files": files}
+    except Exception as e:
+        print(repr(e))
+        raise HTTPException(HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e)) from e
 
 
 if __name__ == "__main__":
