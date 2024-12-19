@@ -8,7 +8,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from config import INPUT_FILE_FORMAT, UPLOAD_FOLDER, VECTOR_FOLDER
+from config import INPUT_FILE_FORMAT, PORT, UPLOAD_FOLDER, VECTOR_FOLDER
 from inference import rag_chain
 from ingest import process_uploaded_docs
 
@@ -24,6 +24,11 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 @app.get("/", response_class=HTMLResponse)
 async def landing_page(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.get("/chat", response_class=HTMLResponse)
+async def chat_page(request: Request):
+    return templates.TemplateResponse("chat.html", {"request": request})
 
 
 @app.post("/upload")
@@ -80,4 +85,4 @@ async def list_faiss_files():
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=PORT)
