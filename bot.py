@@ -12,8 +12,9 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 
 from config import (
     BOT_NAME,
+    DEVICE_MAP,
     EMBADDING_MODEL,
-    LLM_CHECKPOINT,
+    LLM_CHECKPOINT_ID,
     LLM_TASK,
     LLM_TEMPERATURE,
     PROMPT_INSTRUCTIONS,
@@ -21,14 +22,19 @@ from config import (
 )
 
 tokenizer = AutoTokenizer.from_pretrained(
-    LLM_CHECKPOINT, return_tensors="pt", truncation=True
+    LLM_CHECKPOINT_ID, return_tensors="pt", truncation=True
 )
-model = AutoModelForSeq2SeqLM.from_pretrained(LLM_CHECKPOINT, torch_dtype=torch.float32)
+if "t5" in LLM_CHECKPOINT_ID:
+    model = AutoModelForSeq2SeqLM.from_pretrained(LLM_CHECKPOINT_ID)
+else:
+    model = LLM_CHECKPOINT_ID
+
 text2text_pipe = pipeline(
     task=LLM_TASK,
     model=model,
     tokenizer=tokenizer,
-    device_map="auto",
+    device_map=DEVICE_MAP,
+    torch_dtype=torch.bfloat16,
     do_sample=True,
     temperature=LLM_TEMPERATURE,
 )
