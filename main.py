@@ -1,13 +1,15 @@
 import os
+from http import HTTPStatus
 from typing import List
 
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.requests import Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from config import INPUT_FILE_FORMAT, UPLOAD_FOLDER
+from inference import rag_chain
 from ingest import process_uploaded_docs
 
 app = FastAPI(title="d-chat")
@@ -39,6 +41,23 @@ async def upload_files(files: List[UploadFile] = File(...)):
 
     process_uploaded_docs(file_path, INPUT_FILE_FORMAT)
     return {"message": "Files uploaded successfully!"}
+
+
+@app.post("/ask")
+async def ask_question(question: str, file_name: str):
+    try:
+        answer = rag_chain(question, file_name)
+        return {"question": question, "answer": answer}
+    except FileNotFoundError as e:
+        print(repr(e))
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Index file not found"
+        ) from e
+    except Exception as e:
+        print(repr(e))
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e)
+        ) from e
 
 
 if __name__ == "__main__":
