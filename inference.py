@@ -12,7 +12,6 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 
 from config import (
     BOT_NAME,
-    DEVICE_MAP,
     EMBADDING_MODEL,
     LLM_CHECKPOINT_ID,
     LLM_TASK,
@@ -29,16 +28,16 @@ if "t5" in LLM_CHECKPOINT_ID:
 else:
     model = LLM_CHECKPOINT_ID
 
-text2text_pipe = pipeline(
+pipe = pipeline(
     task=LLM_TASK,
     model=model,
     tokenizer=tokenizer,
-    device_map=DEVICE_MAP,
     torch_dtype=torch.bfloat16,
     do_sample=True,
     temperature=LLM_TEMPERATURE,
 )
-llm = HuggingFacePipeline(pipeline=text2text_pipe)
+
+llm = HuggingFacePipeline(pipeline=pipe)
 
 st_embeddings = HuggingFaceEmbeddings(model_name=EMBADDING_MODEL)
 
