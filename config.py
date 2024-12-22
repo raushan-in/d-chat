@@ -10,8 +10,8 @@ INPUT_FILE_FORMAT = ".pdf"
 # LLM
 # "meta-llama/Llama-3.2-1B"  # "google/flan-t5-base"
 # "mistralai/Mistral-7B-v0.1" "facebook/bart-large-cnn"
-LLM_CHECKPOINT_ID = "facebook/bart-large-cnn"
-LLM_TASK = "summarization"  # "text-generation", "summarization"
+LLM_CHECKPOINT_ID = "google/flan-t5-base"
+LLM_TASK = "text2text-generation"  # "text-generation", "summarization"
 LLM_TEMPERATURE = 0.4
 
 # data embedding
