@@ -9,11 +9,10 @@ from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 
-from config import VECTOR_FOLDER
+from config import VECTOR_FOLDER, EMBADDING_MODEL
 
 
 # Initialize Sentence Transformers Embedding
-EMBADDING_MODEL = "sentence-transformers/all-mpnet-base-v2"
 st_embeddings = HuggingFaceEmbeddings(model_name=EMBADDING_MODEL)
 
 
