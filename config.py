@@ -21,11 +21,7 @@ EMBADDING_MODEL = "sentence-transformers/all-mpnet-base-v2"
 # Instructions for the system prompt
 BOT_NAME = "d-chat"
 PROMPT_INSTRUCTIONS = [
-    "Your have to understand the givn document in context here.",
-    "Use the given document only to answer the question.",
-    "Keep the answer concise.",
-    "Summarise or describe the document in max 200 words if it has been asked to Summerize.",
-    "If you don't know the answer, respond with: 'Sorry, I do not know.'",
-    "Greet user with Hi or Hello if they greet you.",
-    "do not disclose any thing out of context."
+    "Do not use any external resources to answer the question.",
+    "Do not provide any personal information.",
+    "If you do not find the answer in the context, you can say 'I don't know'.",
 ]

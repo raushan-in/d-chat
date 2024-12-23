@@ -1,6 +1,7 @@
 """
 Extract and save source data
 """
+
 import os
 
 from langchain_community.document_loaders import PDFPlumberLoader
@@ -16,7 +17,32 @@ EMBADDING_MODEL = "sentence-transformers/all-mpnet-base-v2"
 st_embeddings = HuggingFaceEmbeddings(model_name=EMBADDING_MODEL)
 
 
-def extract_pdf(file_path):
+def preprocess_document(doc, has_header=True, has_footer=True):
+    """
+    Preprocess the document by optionally removing headers and footers.
+
+    Parameters:
+    - doc: The document object containing `page_content`.
+    - has_header (bool): Whether to remove the header (first line).
+    - has_footer (bool): Whether to remove the footer (last line).
+
+    Returns:
+    - The document with updated `page_content`.
+    """
+    lines = doc.page_content.split("\n")  # Split the content into lines
+
+    # Determine start and end indices based on the flags
+    start_idx = 1 if has_header else 0  # Skip the first line if has header
+    end_idx = -1 if has_footer else None  # Skip the last line if has footer
+
+    body_lines = lines[start_idx:end_idx]
+
+    # Rejoin the lines and update the document content
+    doc.page_content = "\n".join(body_lines)
+    return doc
+
+
+def extract_pdf(file_path, has_header, has_footer):
     """
     Processes a PDF file and extracts its content using `PDFPlumberLoader`.
 
@@ -36,7 +62,10 @@ def extract_pdf(file_path):
     loader = PDFPlumberLoader(file_path)
     documents = loader.load()
 
-    return documents
+    # Preprocess the documents
+    cleaned_documents = [preprocess_document(doc, has_header, has_footer) for doc in documents]
+
+    return cleaned_documents
 
 
 def chunck_docs(documents: list, chunk_size=1000, chunk_overlap=200):
@@ -78,7 +107,7 @@ def save_to_faiss(chunks, index_name="faiss_index"):
     print(f"FAISS index saved as '{index_name}'.")
 
 
-def process_uploaded_docs(file_path, file_format):
+def process_uploaded_docs(file_path, file_format, has_header, has_footer):
     """
     Full pipeline: extract, chunk, and save PDF data into FAISS.
     Args:
@@ -88,7 +117,7 @@ def process_uploaded_docs(file_path, file_format):
 
     # Step 1: Extract content
     if file_format == ".pdf":
-        documents = extract_pdf(file_path)
+        documents = extract_pdf(file_path, has_header, has_footer)
     else:
         # Not Implemented
         return
