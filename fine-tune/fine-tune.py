@@ -11,14 +11,24 @@ from datasets import Dataset
 from sentence_transformers import InputExample, SentenceTransformer, losses
 from sklearn.metrics import accuracy_score
 from torch.utils.data import DataLoader
-from transformers import AutoModel, AutoTokenizer, Trainer, TrainingArguments
+from transformers import (
+    AutoModelForSeq2SeqLM,
+    AutoTokenizer,
+    DataCollatorForSeq2Seq,
+    Trainer,
+    TrainingArguments,
+)
 
 # Configuration
+embedding_model_save_path = "fine-tune/trained_models/all-mpnet-base-v2-fine-tuned"
+llm_model_save_path = "fine-tune/trained_models/flan-t5-base-fine-tuned"
+training_logs_path = "fine-tune/logs"
+
 EMBEDDING_MODEL = "sentence-transformers/all-mpnet-base-v2"
 LLM_MODEL = "google/flan-t5-base"
 DOMAIN_DATA_FILE = "fine-tune/training-data/domain_data.csv"
-TRAINED_MODELS_DIR = "fine-tune/trained_models"
 TRAIN_SIZE = 0.8
+SEED = 42
 
 
 def load_domain_data(csv_file):
@@ -43,19 +53,18 @@ def fine_tune_embedding_model():
     train_loss = losses.MultipleNegativesRankingLoss(model)
 
     # Fine-tuning
-    model_save_path = TRAINED_MODELS_DIR + "/fine_tuned_embeddings"
     model.fit(
         train_objectives=[(train_dataloader, train_loss)],
         epochs=3,
-        output_path=model_save_path,
+        output_path=embedding_model_save_path,
     )
-    print(f"Embedding model saved to {model_save_path}")
+    print(f"Embedding model saved to {embedding_model_save_path}")
 
 
 def fine_tune_llm():
     """Fine-Tune Language Model"""
     tokenizer = AutoTokenizer.from_pretrained(LLM_MODEL)
-    model = AutoModel.from_pretrained(LLM_MODEL)
+    model = AutoModelForSeq2SeqLM.from_pretrained(LLM_MODEL)
 
     # Prepare training data
     dataset = Dataset.from_dict(
@@ -69,7 +78,9 @@ def fine_tune_llm():
     )
 
     # Split data into training and validation sets
-    train_data, val_data = dataset.train_test_split(train_size=TRAIN_SIZE).values()
+    train_data, val_data = dataset.train_test_split(
+        train_size=TRAIN_SIZE, seed=SEED
+    ).values()
 
     def preprocess_data(batch):
         inputs = tokenizer(
@@ -80,31 +91,36 @@ def fine_tune_llm():
         )
         batch["input_ids"] = inputs["input_ids"]
         batch["attention_mask"] = inputs["attention_mask"]
-        batch["labels"] = outputs["input_ids"]
+        batch["labels"] = outputs["input_ids"]  # Labels for decoder
         return batch
 
     def compute_metrics(eval_pred):
         """Compute metrics for evaluation"""
         predictions, labels = eval_pred
         predictions = predictions.argmax(axis=-1)  # Convert logits to predictions
-        return {"accuracy": accuracy_score(labels, predictions)}
+        accuracy = accuracy_score(labels, predictions)
+        return {"accuracy": accuracy}
 
     # Preprocess data
     train_data = train_data.map(preprocess_data, batched=True)
     val_data = val_data.map(preprocess_data, batched=True)
 
+    # Data collator
+    data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
+
     # Training arguments
     training_args = TrainingArguments(
-        output_dir=TRAINED_MODELS_DIR + "/fine_tuned_llm",
+        output_dir=llm_model_save_path,
         eval_strategy="steps",
-        eval_steps=50,  # Evaluate every 50 steps
+        eval_steps=10,
         learning_rate=5e-5,
         per_device_train_batch_size=8,
+        per_device_eval_batch_size=8,
         num_train_epochs=3,
         weight_decay=0.01,
         save_steps=10,
         save_total_limit=2,
-        logging_dir="./logs",
+        logging_dir=training_logs_path,
         logging_steps=10,
     )
 
@@ -113,13 +129,14 @@ def fine_tune_llm():
         args=training_args,
         train_dataset=train_data,
         eval_dataset=val_data,
+        data_collator=data_collator,
         compute_metrics=compute_metrics,
     )
 
     # Fine-tuning
     trainer.train()
-    trainer.save_model(TRAINED_MODELS_DIR + "/fine_tuned_llm")
-    print("Language model saved to fine_tuned_llm")
+    trainer.save_model(llm_model_save_path)
+    print(f"Language model saved to {llm_model_save_path}")
 
 
 def add_greeting_response():
@@ -140,7 +157,7 @@ def add_greeting_response():
     )
 
 
-def set_seed(seed=42):
+def set_seed(seed=SEED):
     """Set seed for reproducibility"""
     random.seed(seed)
     np.random.seed(seed)
