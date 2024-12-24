@@ -136,6 +136,7 @@ def fine_tune_llm():
     # Fine-tuning
     trainer.train()
     trainer.save_model(llm_model_save_path)
+    tokenizer.save_pretrained(llm_model_save_path)
     print(f"Language model saved to {llm_model_save_path}")
 
 

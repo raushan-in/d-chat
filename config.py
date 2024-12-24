@@ -8,14 +8,12 @@ INPUT_FILE_FORMAT = ".pdf"
 
 
 # LLM
-# "meta-llama/Llama-3.2-1B"  # "google/flan-t5-base"
-# "mistralai/Mistral-7B-v0.1" "facebook/bart-large-cnn"
-LLM_CHECKPOINT_ID = "google/flan-t5-base"
+LLM_CHECKPOINT_ID = "fine-tune/trained_models/flan-t5-base-fine-tuned" #"google/flan-t5-base"
 LLM_TASK = "text2text-generation"  # "text-generation", "summarization"
 LLM_TEMPERATURE = 0.4
 
 # data embedding
-EMBADDING_MODEL = "sentence-transformers/all-mpnet-base-v2"
+EMBADDING_MODEL = "fine-tune/trained_models/all-mpnet-base-v2-fine-tuned" #"sentence-transformers/all-mpnet-base-v2"
 
 
 # Instructions for the system prompt
