@@ -46,8 +46,9 @@ async def upload_files(files: List[UploadFile] = File(...)):
                 status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
                 detail="Not a valid file.",
             )
-
-    process_uploaded_docs(file_path, INPUT_FILE_FORMAT)
+    has_header= True
+    has_footer= True
+    process_uploaded_docs(file_path, INPUT_FILE_FORMAT, has_header, has_footer)
     return {"message": "Files uploaded successfully!"}
 
 

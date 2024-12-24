@@ -12,7 +12,6 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 
 from config import (
     BOT_NAME,
-    DEVICE_MAP,
     EMBADDING_MODEL,
     LLM_CHECKPOINT_ID,
     LLM_TASK,
@@ -21,42 +20,40 @@ from config import (
     VECTOR_FOLDER,
 )
 
-tokenizer = AutoTokenizer.from_pretrained(
-    LLM_CHECKPOINT_ID, return_tensors="pt", truncation=True
-)
+tokenizer = AutoTokenizer.from_pretrained(LLM_CHECKPOINT_ID, return_tensors="pt")
+
 if "t5" in LLM_CHECKPOINT_ID:
     model = AutoModelForSeq2SeqLM.from_pretrained(LLM_CHECKPOINT_ID)
 else:
     model = LLM_CHECKPOINT_ID
 
-text2text_pipe = pipeline(
+pipe = pipeline(
     task=LLM_TASK,
     model=model,
     tokenizer=tokenizer,
-    device_map=DEVICE_MAP,
     torch_dtype=torch.bfloat16,
     do_sample=True,
     temperature=LLM_TEMPERATURE,
 )
-llm = HuggingFacePipeline(pipeline=text2text_pipe)
+
+llm = HuggingFacePipeline(pipeline=pipe)
 
 st_embeddings = HuggingFaceEmbeddings(model_name=EMBADDING_MODEL)
 
 
-PROMPT_INSTRUCTIONS_STR = "\n".join(
-    [f"{idx+1}. {instruction}" for idx, instruction in enumerate(PROMPT_INSTRUCTIONS)]
-)
-
-PROMPT_LITERALS = """Instructions:
-{instructions} \n
-Context: {context}
+PROMPT_INSTRUCTION_LITERALS = f"""Instructions:
+{"\n".join(
+    [f"{idx+1}. {instruction} " for idx, instruction in enumerate(PROMPT_INSTRUCTIONS)]
+)}
 """
 
 
 prompt = ChatPromptTemplate.from_messages(
     [
-        ("system", f"You are an assistant bot, named {BOT_NAME}."),
-        ("system", PROMPT_LITERALS),
+        ("system", f"You are an AI assistant bot, named {BOT_NAME}."),
+        ("system", "Answer questions based on the context provided below."),
+        ("system", "\n{context}"),
+        ("system", PROMPT_INSTRUCTION_LITERALS),
         ("human", "{input}"),
     ]
 )
@@ -110,5 +107,5 @@ def rag_chain(query, index_to_use) -> str:
     # convenience functions for LCEL
     question_answer_chain = create_stuff_documents_chain(llm, prompt)
     chain = create_retrieval_chain(retriever, question_answer_chain)
-    response = chain.invoke({"input": query, "instructions": PROMPT_INSTRUCTIONS_STR})
+    response = chain.invoke({"input": query})
     return response["answer"]
