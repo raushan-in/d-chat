@@ -67,14 +67,14 @@ def extract_pdf(file_path, has_header, has_footer):
     return cleaned_documents
 
 
-def chunck_docs(documents: list, chunk_size=1000, chunk_overlap=200):
+def chunck_docs(documents: list, chunk_size=500, chunk_overlap=30):
     """
     Splits the extracted text into chunks for further processing.
 
     Args:
         documents (list): A list of string.
-        chunk_size (int): Maximum size of each text chunk (default is 1000 characters).
-        chunk_overlap (int): Number of overlapping characters between chunks (default is 200 characters).
+        chunk_size (int): Maximum size of each text chunk.
+        chunk_overlap (int): Number of overlapping characters between chunks.
 
     Returns:
         list: A list of chunk, where each chunk is a dictionary containing page content and metadata.
