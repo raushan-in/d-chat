@@ -1,0 +1,9 @@
+context,question,answer
+"Go routines are lightweight threads in Go programming.","What are Go routines?","Go routines are lightweight threads in Go."
+"Channels in Go are used for communication between goroutines.","What are channels in Go?","Channels are used for communication between goroutines."
+"Go supports only 'for' loops for iteration.","How many loops does Go support?","Go supports only 'for' loops for iteration."
+"Go's error handling uses explicit error return values.","How does Go handle errors?","Go uses explicit error return values for error handling."
+"Go is a statically typed, compiled programming language.","What type of language is Go?","Go is a statically typed, compiled programming language."
+"Select statement in Go is used for communication between multiple channels.","What is the use of select statement in Go?","Select statement in Go is used for communication between multiple channels."
+"Greeting context for D-chat.","Hi","Hi, I am D-chat. How can I assist today?"
+"Greeting context for D-chat.","Hello","Hello, I am D-chat. How can I assist today?"
