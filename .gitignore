@@ -141,6 +141,8 @@ vectors/
 
 # models
 llm-models/
+fine-tune/trained_models/*
+fine-tune/training-data/*
 
 # mac
 .DS_Store
