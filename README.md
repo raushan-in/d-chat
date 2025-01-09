@@ -5,13 +5,10 @@
 
 <p align="center">Your Document, Your Query, Instant Answers. 🤗 </p>
 
----
-
-### About QQ 
-QQ is an AI powered RAG tool that allows users to upload PDF documents and retrieve valuable insights through simple queries. Whether it's calculating totals from invoices or summarizing academic records, QQ makes it easy to interact with your data anytime. QQ ensures your personal data is safe while delivering instant, meaningful answers to a wide range of document-related queries.
+QQ is a RAG tool that allows users to upload PDF documents and retrieve valuable insights through simple queries. Whether it's calculating totals from invoices or summarizing academic records, QQ makes it easy to interact with your data anytime. QQ ensures your personal data is safe while delivering instant, meaningful answers to a wide range of document-related queries.
 
 ---
-# RAG
+### RAG
 RAG, short for **Retrieval-Augmented Generation**, is like a smart librarian paired with a storyteller. Imagine you’re writing a report but don’t remember all the facts—you quickly look things up in a trusted book and then weave it into your writing. That’s what RAG does! Instead of making things up entirely on its own, an AI first "retrieves" relevant info from documents (like searching a internal knowledge base) and then "generates" a response using that info in the language you understand. This makes answers more accurate and up-to-date, especially when working with personal or sensitive topics. It’s like giving the AI a reference sheet to ensure it gives you the best possible answer!
 
 <img width="873" alt="Screenshot 2025-01-09 at 12 40 44 PM" src="https://github.com/user-attachments/assets/ef73daf5-c54c-491d-aab4-7d6ddbebe467" />
