@@ -3,9 +3,9 @@
 </p>
 <h1 align="center">QQ (Query Queen)</h1>
 
-<p align="center">Your Document, Your Query, Instant Answers. 🤗 </p>
+<p align="center">From Your Data to Done: Queries Answered, Actions Delivered. 🤗 </p>
 
-QQ is a RAG tool that allows users to upload PDF documents and retrieve valuable insights through simple queries. Whether it's calculating totals from invoices or summarizing academic records, QQ makes it easy to interact with your data anytime. QQ ensures your personal data is safe while delivering instant, meaningful answers to a wide range of document-related queries.
+QQ is a multimodal intelligent agent designed to process user queries by leveraging personal data uploaded in the backend and executing relevant actions based on specific use cases. Whether it’s answering queries, registering feedback, or scheduling meetings, QQ streamlines user interactions with seamless, data-driven responses and task automation. The system ensures robust data security while delivering accurate insights and performing actions efficiently, catering to a wide range of user needs.
 
 ---
 ### RAG
@@ -15,11 +15,13 @@ RAG, short for **Retrieval-Augmented Generation**, is like a smart librarian pai
 
 ---
 ### Example Use Cases 
-- **Invoices:** Query totals, tax amounts, etc.
-- **Contracts:** Search for key clauses or dates.
-- **Legal:** Summerise the order.
----
+- **Invoices:** Retrieve totals, tax details, or payment due dates.
+- **Contracts:** Extract key clauses, terms, or important deadlines.
+- **Legal Documents:** Summarize court orders or legal notices.
+- **Agent:** Register a feedback or appointtment of customer.
+- **Customer Support:** Register feedback, book appointments, or log service requests.
 
+---
 ### How to Use QQ 
 1. Upload a PDF document using the tool’s interface.  
 2. Ask questions about your document's content.  

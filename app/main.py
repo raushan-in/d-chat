@@ -12,13 +12,13 @@ from config import INPUT_FILE_FORMAT, PORT, UPLOAD_FOLDER, VECTOR_FOLDER
 from inference import rag_chain
 from ingest import process_uploaded_docs
 
-app = FastAPI(title="d-chat")
+app = FastAPI(title="QQ", description="From Your Data to Done", version="0.1.0")
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="web/templates")
 
 # Mount static files for serving CSS
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/web/static", StaticFiles(directory="web/static"), name="static")
 
 
 @app.get("/", response_class=HTMLResponse)
