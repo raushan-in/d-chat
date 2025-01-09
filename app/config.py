@@ -31,3 +31,13 @@ PROMPT_INSTRUCTIONS = [
     "Do not provide any personal information.",
     "If you do not find the answer in the context, you can say 'I don't know'.",
 ]
+
+
+# Custom LLM
+CUSTOM_LLM_API = os.environ.get("CUSTOM_LLM_API")
+CUSTOM_LLM = os.environ.get("CUSTOM_LLM")
+CUSTOM_LLM_OPTIONS = {
+    "seed": 42,
+    "temperature": LLM_TEMPERATURE,
+    "num_predict": 200,
+}
