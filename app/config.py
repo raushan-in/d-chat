@@ -25,7 +25,7 @@ EMBADDING_MODEL = os.environ.get("EMBADDING_MODEL")
 
 
 # Instructions for the system prompt
-BOT_NAME = os.environ.get("BOT_NAME", "d-bot")
+BOT_NAME = os.environ.get("BOT_NAME", "QQ Bot")
 PROMPT_INSTRUCTIONS = [
     "Do not use any external resources to answer the question.",
     "Do not provide any personal information.",

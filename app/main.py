@@ -15,6 +15,8 @@ from ingest import process_uploaded_docs
 app = FastAPI(title="QQ", description="From Your Data to Done", version="0.1.0")
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(VECTOR_FOLDER, exist_ok=True)
+
 templates = Jinja2Templates(directory="web/templates")
 
 # Mount static files for serving CSS
@@ -72,9 +74,6 @@ async def ask_question(question: str, file_name: str):
 @app.get("/uploaded-files")
 async def list_faiss_files():
     try:
-        if not os.path.exists(VECTOR_FOLDER):
-            raise HTTPException(status_code=404, detail="Vectors folder not found")
-
         files = [
             os.path.splitext(f)[0]
             for f in os.listdir(VECTOR_FOLDER)
