@@ -1,77 +1,22 @@
 """
-Putting the model to work on live data
+LLM Inference.
 """
 
-import torch
+from config import PROMPT_INSTRUCTION_LITERALS
+from context_builder import vectorstore_retriever
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains.retrieval import create_retrieval_chain
-from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_huggingface import HuggingFaceEmbeddings, HuggingFacePipeline
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
-
-from config import (
-    BOT_NAME,
-    EMBADDING_MODEL,
-    LLM_CHECKPOINT_ID,
-    LLM_TASK,
-    LLM_TEMPERATURE,
-    PROMPT_INSTRUCTIONS,
-    VECTOR_FOLDER,
-)
-
-tokenizer = AutoTokenizer.from_pretrained(LLM_CHECKPOINT_ID, return_tensors="pt")
-
-if "t5" in LLM_CHECKPOINT_ID:
-    model = AutoModelForSeq2SeqLM.from_pretrained(LLM_CHECKPOINT_ID)
-else:
-    model = LLM_CHECKPOINT_ID
-
-pipe = pipeline(
-    task=LLM_TASK,
-    model=model,
-    tokenizer=tokenizer,
-    torch_dtype=torch.bfloat16,
-    do_sample=True,
-    temperature=LLM_TEMPERATURE,
-)
-
-llm = HuggingFacePipeline(pipeline=pipe)
-
-st_embeddings = HuggingFaceEmbeddings(model_name=EMBADDING_MODEL)
-
-
-PROMPT_INSTRUCTION_LITERALS = f"""Instructions:
-{"\n".join(
-    [f"{idx+1}. {instruction} " for idx, instruction in enumerate(PROMPT_INSTRUCTIONS)]
-)}
-"""
+from llm import llm
 
 
 prompt = ChatPromptTemplate.from_messages(
     [
-        ("system", f"You are an AI assistant bot, named {BOT_NAME}."),
-        ("system", "Answer questions based on the context provided below."),
-        ("system", "\n{context}"),
+        ("system", "\n{context} :\n"),
         ("system", PROMPT_INSTRUCTION_LITERALS),
         ("human", "{input}"),
     ]
 )
-
-
-def get_faiss_vectorstore_retriever(index_name: str):
-    """Load the FAISS index with HuggingFace embeddings."""
-    try:
-        vectorstore = FAISS.load_local(
-            VECTOR_FOLDER,
-            embeddings=st_embeddings,
-            index_name=index_name,
-            allow_dangerous_deserialization=True,
-        )
-    except RuntimeError as re:
-        print(repr(re))
-        raise FileNotFoundError("No such file.") from re
-    return vectorstore.as_retriever()
 
 
 def rag_chain(query, index_to_use) -> str:
@@ -102,7 +47,7 @@ def rag_chain(query, index_to_use) -> str:
     - For detailed documentation, see:
       https://python.langchain.com/v0.2/docs/tutorials/rag/#built-in-chains
     """
-    retriever = get_faiss_vectorstore_retriever(index_to_use)
+    retriever = vectorstore_retriever(index_to_use)
 
     # convenience functions for LCEL
     question_answer_chain = create_stuff_documents_chain(llm, prompt)
