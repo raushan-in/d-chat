@@ -26,7 +26,7 @@ RAG, short for **Retrieval-Augmented Generation**, is like a smart librarian pai
 ### How to Use QQ 
 1. Upload a PDF document using the tool’s interface.  
 2. Ask questions about your document's content.  
-3. Get instant, accurate answers.
+3. Get instant, accurate* answers. *<i>"AI can occasionally produce non-deterministic answers"</i>.
 
 
 ---
