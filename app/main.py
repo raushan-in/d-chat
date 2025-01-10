@@ -8,9 +8,9 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from config import INPUT_FILE_FORMAT, PORT, UPLOAD_FOLDER, VECTOR_FOLDER
-from inference import rag_chain
-from ingest import process_uploaded_docs
+from app.config import INPUT_FILE_FORMAT, PORT, UPLOAD_FOLDER, VECTOR_FOLDER
+from app.inference import rag_chain
+from app.ingest import process_uploaded_docs
 
 app = FastAPI(title="QQ", description="From Your Data to Done", version="0.1.0")
 
@@ -48,8 +48,8 @@ async def upload_files(files: List[UploadFile] = File(...)):
                 status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
                 detail="Not a valid file.",
             )
-    has_header= True
-    has_footer= True
+    has_header = True
+    has_footer = True
     process_uploaded_docs(file_path, INPUT_FILE_FORMAT, has_header, has_footer)
     return {"message": "Files uploaded successfully!"}
 
