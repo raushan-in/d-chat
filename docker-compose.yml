@@ -1,0 +1,12 @@
+services:
+  web:
+    build: .
+    container_name: qq_app
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/app
+    environment:
+      - PORT=8000
+      - UPLOAD_FOLDER=/app/uploads
+      - VECTOR_FOLDER=/app/vectors

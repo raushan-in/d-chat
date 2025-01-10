@@ -36,39 +36,27 @@ To run the **QQ** application, follow the steps below:
 ---
 
 ### Prerequisites  
-- **Python 3.11** is required. Ensure it is installed. 
+- **Python 3.11** is required. Ensure it is installed.
+- **Docker** is required. Install **Docker Desktop** from the [official Docker website](https://www.docker.com/products/docker-desktop/).
 
 ---
 
 ### Steps to Launch
 
-1. **Install Poetry**  
-   Run the following command to install Poetry:  
-   ```bash
-   pip install poetry
-   ```  
-
-2. **Install Dependencies**  
-   Navigate to the project directory and run:  
-   ```bash
-   poetry install
-   ```  
-   This installs all required dependencies within the Poetry-managed environment.  
-
-3. **Configure Environment Variables**  
+1. **Configure Environment Variables**  
    Create a `.env` file in the project root directory by taking reference from `example.env`:  
    ```bash
    cp example.env .env
    ```  
    Update the necessary values in the `.env` file as per your setup.  
 
-4. **Start the Server**  
+2. **Start the App**  
    Run the application server with:  
    ```bash
-   poetry run python -m app.main
+   docker-compose up --build -d
    ```
 
-5. **Access the Application**  
+3. **Access the Application**  
    Once the server is running, open your browser and go to:  
    [http://localhost:8000/](http://localhost:8000/) 
 

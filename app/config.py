@@ -39,11 +39,9 @@ PROMPT_INSTRUCTIONS = [
     f"Response length SHOULD NOT be more than {LLM_RESPONSE_LEN} characters.",
     "If you do not find the answer in the context, you can say 'I don't know'.",
 ]
-PROMPT_INSTRUCTION_LITERALS = f"""Instructions:
-{"\n".join(
-    [f"{idx+1}. {instruction} " for idx, instruction in enumerate(PROMPT_INSTRUCTIONS)]
-)}
-"""
+PROMPT_INSTRUCTION_LITERALS = "Instructions:\n" + "\n".join(
+    [f"{idx+1}. {instruction}" for idx, instruction in enumerate(PROMPT_INSTRUCTIONS)]
+)
 
 # Custom LLM
 CUSTOM_LLM_ENABLED = os.environ.get("CUSTOM_LLM_ENABLED", "True").lower() == "true"
