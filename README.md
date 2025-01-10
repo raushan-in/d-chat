@@ -45,7 +45,7 @@ To run the **QQ** application, follow the steps below:
 1. **Install Poetry**  
    Run the following command to install Poetry:  
    ```bash
-   (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
+   pip install poetry
    ```  
 
 2. **Install Dependencies**  
