@@ -2,7 +2,7 @@
 Chat BOT
 """
 
-from inference import rag_chain
+from app.inference import rag_chain
 
 
 def run():

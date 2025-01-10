@@ -3,7 +3,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 
-from config import VECTOR_FOLDER, EMBADDING_MODEL
+from app.config import VECTOR_FOLDER, EMBADDING_MODEL
 
 # Initialize Sentence Transformers Embedding
 embedding = HuggingFaceEmbeddings(model_name=EMBADDING_MODEL)

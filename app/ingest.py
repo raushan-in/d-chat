@@ -4,8 +4,9 @@ Extract and save source data
 
 import os
 
-from context_builder import save_context
 from langchain_community.document_loaders import PDFPlumberLoader
+
+from app.context_builder import save_context
 
 
 def preprocess_document(doc, has_header=True, has_footer=True):

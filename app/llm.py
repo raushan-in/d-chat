@@ -2,7 +2,7 @@ from typing import Any, List, Mapping, Optional
 
 import requests
 import torch
-from config import (
+from app.config import (
     CUSTOM_LLM,
     CUSTOM_LLM_API,
     CUSTOM_LLM_ENABLED,

@@ -65,8 +65,8 @@ To run the **QQ** application, follow the steps below:
 4. **Start the Server**  
    Run the application server with:  
    ```bash
-   poetry run python app/main.py
-   ```  
+   poetry run python -m app.main
+   ```
 
 5. **Access the Application**  
    Once the server is running, open your browser and go to:  

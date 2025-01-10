@@ -2,13 +2,13 @@
 LLM Inference.
 """
 
-from config import PROMPT_INSTRUCTION_LITERALS
-from context_builder import vectorstore_retriever
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains.retrieval import create_retrieval_chain
 from langchain_core.prompts import ChatPromptTemplate
-from llm import llm
 
+from app.config import PROMPT_INSTRUCTION_LITERALS
+from app.context_builder import vectorstore_retriever
+from app.llm import llm
 
 prompt = ChatPromptTemplate.from_messages(
     [
