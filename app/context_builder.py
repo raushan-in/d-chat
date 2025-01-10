@@ -8,7 +8,7 @@ from app.config import VECTOR_FOLDER, EMBADDING_MODEL
 # Initialize Sentence Transformers Embedding
 embedding = HuggingFaceEmbeddings(model_name=EMBADDING_MODEL)
 
-def chunck_docs(documents: list, chunk_size=500, chunk_overlap=30):
+def chunck_docs(documents: list, chunk_size=200, chunk_overlap=20):
     """
     Splits the extracted text into chunks for further processing.
 
@@ -66,4 +66,4 @@ def vectorstore_retriever(index_name: str):
     except RuntimeError as re:
         print(repr(re))
         raise FileNotFoundError("No such file.") from re
-    return vectorstore.as_retriever()
+    return vectorstore.as_retriever(search_kwargs={"k":2})

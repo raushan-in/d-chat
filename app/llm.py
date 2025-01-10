@@ -39,13 +39,9 @@ class CustomLLM(LLM):
             "options": CUSTOM_LLM_OPTIONS,
         }
 
-        headers = {"Content-Type": "application/json"}
-
-        response = requests.post(
-            CUSTOM_LLM_API, json=payload, headers=headers, verify=False
-        )
+        response = requests.post(CUSTOM_LLM_API, json=payload, verify=False, timeout=90)
         response.raise_for_status()
-        return response.json()["response"]  # get the response from the API
+        return response.json()["response"]  # response from the API
 
     @property
     def _identifying_params(self) -> Mapping[str, Any]:
