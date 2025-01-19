@@ -15,6 +15,7 @@ UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER")
 VECTOR_FOLDER = os.environ.get("VECTOR_FOLDER")
 INPUT_FILE_FORMAT = os.environ.get("INPUT_FILE_FORMAT")
 
+# Groq
 
 # HG LLM
 LLM_CHECKPOINT_ID = os.environ.get("HG_LLM_CHECKPOINT_ID")
