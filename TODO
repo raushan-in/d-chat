@@ -1,3 +1,5 @@
 - Histroy aware chat - https://python.langchain.com/v0.2/docs/tutorials/qa_chat_history/
 
 - Update chat interface with streamlit
+
+- docling for improved data processing
