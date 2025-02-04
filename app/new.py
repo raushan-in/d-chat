@@ -66,18 +66,9 @@ if prompt := st.chat_input("How may I help you?"):
 
     if prompt.strip() and uploaded_files:
         try:
-            url = "http://localhost:8000/ask"  # Replace with your API endpoint
-            file_names = [file.name for file in uploaded_files] if uploaded_files else []
-            payload = {
-                "query": {
-                    "question": prompt,       # User's question
-                    "file_name": file_names  # Replace with the actual file name being queried
-                }
-            }            
-            #payload = {"query": prompt, "document_id": file_names}  # Replace with dynamic document ID if needed
-            headers = {"Content-Type": "application/json"}
-        
-            response = requests.post(url, json=payload, headers=headers)
+            url = f"http://localhost:8000/ask?question={prompt}&file_name={uploaded_files[0].name}"  # Replace with your API endpoint
+       
+            response = requests.post(url)
         
             if response.status_code == 200:
                 # Get the assistant's response from the API
